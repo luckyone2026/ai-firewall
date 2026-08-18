@@ -1,0 +1,22 @@
+S5735-S48P4XE-V2
+
+<HUAWEI> sys
+<HUAWEI> system‑view
+
+[HUAWEI] web‑manager enable
+[HUAWEI] web‑manager permit‑interface all
+[HUAWEI]web-manager server-source all-interface
+
+
+[HUAWEI] aaa
+[HUAWEI‑aaa] local‑user admin123 password irreversible‑cipher Admin@123
+[HUAWEI‑aaa] local‑user admin123 service‑type http
+[HUAWEI‑aaa] local‑user admin123 privilege level 3
+[HUAWEI‑aaa] quit
+
+[HUAWEI] save
+
+浏览器访问：https://交换机管理IP
+账号：admin123
+密码：Admin@999
+
