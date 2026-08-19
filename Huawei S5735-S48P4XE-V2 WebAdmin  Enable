@@ -42,3 +42,77 @@ S5735-S48P4XE-V2
 账号：admin123
 密码：Admin@123
 
+# S5735‑S48P4XE‑V2（V600R025SPH120）恢复出厂后完整配置流程
+
+恢复出厂后：无管理 IP、无账号、Web 默认关闭，只能Console 串口登录配置。
+全部命令直接复制粘贴即可。
+第一步：Console 登录，进入用户视图
+设备启动完成，提示符：<HUAWEI>
+cli
+# 进入系统视图
+<HUAWEI>system-view
+第二步：配置设备名称（可选）
+cli
+[HUAWEI]sysname SW‑S5735
+第三步：配置管理 VLAN 与管理 IP
+默认所有端口属于 VLAN1，使用 Vlanif1 做管理接口。
+修改 IP 为你现场实际网段。
+cli
+[SW‑S5735]interface Vlanif 1
+[SW‑S5735‑Vlanif1]ip address 192.168.1.100 255.255.255.0
+[SW‑S5735‑Vlanif1]quit
+第四步：开启 Web‑Manager HTTPS 管理（V600R025 专用）
+cli
+# 开启web管理服务，默认443端口
+[SW‑S5735]web-manager enable
+
+# 允许所有三层接口访问web（替代旧版 permit‑interface all）
+[SW‑S5735]web-manager server-source all-interface
+第五步：创建 Web/Console 管理账号（V600R025 重点）
+✅必须带 class manage；service‑type 写web；权限最大 3 级；用户名≥6 位
+cli
+[SW‑S5735]aaa
+[SW‑S5735‑aaa]local-user admin123 class manage
+[SW‑S5735‑aaa]local-user admin123 password irreversible-cipher Admin@1234
+[SW‑S5735‑aaa]local-user admin123 service‑type web terminal
+[SW‑S5735‑aaa]local-user admin123 privilege level 3
+[SW‑S5735‑aaa]quit
+service‑type web terminal：同时支持网页登录 + Console 串口登录
+密码复杂度：大小写 + 数字 + 特殊符号，否则报错
+第六步【可选安全加固】ACL 限制 Web 登录来源网段
+只允许 192.168.1.0/24 网段访问交换机 web 管理，其他 IP 拒绝访问
+cli
+[SW‑S5735]acl number 3000
+[SW‑S5735‑acl‑adv‑3000]rule permit ip source 192.168.1.0 0.0.0.255
+[SW‑S5735‑acl‑adv‑3000]quit
+
+# ACL绑定web服务
+[SW‑S5735]web-manager acl 3000
+第七步：保存配置 ⚠️退回用户视图！
+cli
+[SW‑S5735]quit
+<SW‑S5735>save
+# 提示确认输入 Y
+第八步：校验配置是否生效
+cli
+<SW‑S5735>display web-manager configuration
+<SW‑S5735>display local-user
+<SW‑S5735>display ip interface brief Vlanif 1
+浏览器访问
+电脑接交换机任意网口，电脑 IP 设置同网段：192.168.1.x
+访问：https://192.168.1.100
+❗V600R025不支持 http，浏览器证书告警选择继续访问，输入账号admin123、密码Admin@1234登录。
+常见故障排查
+网页打不开
+确认电脑 IP 与 Vlanif1 同网段，关闭电脑防火墙；
+确认执行过web-manager enable；
+确认 ACL 没有拦截本机 IP；
+只能用https://，不要写 http://。
+账号密码正确网页登录失败
+账号缺少 class manage，这是 V600R025 强制要求；
+service‑type 需要包含web。
+save 报错
+必须在<>用户视图，不能在[]系统视图执行 save。
+后续业务配置提示
+以上仅完成管理基础配置，业务 VLAN、POE、端口划分、聚合等，再在 Web 界面或者命令行继续配置。
+如果你需要，我可以给你一份基础业务示例（划分 VLAN、POE 开启）。
