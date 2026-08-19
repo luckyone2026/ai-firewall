@@ -1,7 +1,29 @@
 S5735-S48P4XE-V2
 
+第一步：Console 登录，进入用户视图
+设备启动完成，提示符：<HUAWEI>
+
+# 进入系统视图
 <HUAWEI> sys
 <HUAWEI> system‑view
+
+第二步：配置设备名称（可选）
+[HUAWEI]sysname SW‑S5735
+
+第三步：配置管理 VLAN 与管理 IP
+默认所有端口属于 VLAN1，使用 Vlanif1 做管理接口。
+修改 IP 为你现场实际网段。
+
+[SW‑S5735]interface Vlanif 1
+[SW‑S5735‑Vlanif1]ip address 192.168.1.253 255.255.255.0
+[SW‑S5735‑Vlanif1]quit
+
+第四步：开启 Web‑Manager HTTPS 管理
+# 开启web管理服务，默认443端口
+[SW‑S5735]web-manager enable
+
+# 允许所有三层接口访问web（替代旧版 permit‑interface all）
+[SW‑S5735]web-manager server-source all-interface
 
 [HUAWEI] web‑manager enable
 [HUAWEI] web‑manager permit‑interface all
@@ -13,10 +35,10 @@ S5735-S48P4XE-V2
 [HUAWEI‑aaa] local‑user admin123 service‑type http
 [HUAWEI‑aaa] local‑user admin123 privilege level 3
 [HUAWEI‑aaa] quit
-
+[HUAWEI] quit
 [HUAWEI] save
 
 浏览器访问：https://交换机管理IP
 账号：admin123
-密码：Admin@999
+密码：Admin@123
 
